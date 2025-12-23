@@ -1,0 +1,85 @@
+{
+  "id": "rnaseq_star_deseq2",
+  "name": "RNA-seq STAR+DESeq2",
+  "version": "0.1.0",
+  "author": "BioFlow",
+  "description": "Run a standard STAR + featureCounts + DESeq2 pipeline on HPC.",
+  "category": "hpc_pipeline",
+  "engine": "remote",
+  "visibility": "public",
+  "license": "MIT",
+  "pricing": {
+    "type": "paid",
+    "sku": "rnaseq_star_deseq2_basic"
+  },
+  "compatibility": {
+    "min_app_version": "0.1.0",
+    "os": [
+      "windows"
+    ],
+    "requires_ssh": true,
+    "requires_slurm": true
+  },
+  "ui": {
+    "entry_label": "RNA-seq STAR+DESeq2",
+    "icon": "",
+    "group": "Pipelines",
+    "form_schema": [
+      {
+        "id": "remote_fastq_dir",
+        "label": "Fastq directory on HPC",
+        "type": "text",
+        "required": true
+      },
+      {
+        "id": "sample_sheet",
+        "label": "Sample sheet (local CSV)",
+        "type": "file",
+        "file_type": "text/csv",
+        "required": true
+      },
+      {
+        "id": "genome_index",
+        "label": "STAR genome index path",
+        "type": "text",
+        "required": true
+      },
+      {
+        "id": "cpus",
+        "label": "CPUs per job",
+        "type": "number",
+        "default": 8
+      },
+      {
+        "id": "memory",
+        "label": "Memory GB",
+        "type": "number",
+        "default": 32
+      },
+      {
+        "id": "partition",
+        "label": "Slurm partition",
+        "type": "text",
+        "default": "normal"
+      }
+    ],
+    "output_views": [
+      {
+        "id": "qc_overview",
+        "type": "table",
+        "title": "QC Summary"
+      },
+      {
+        "id": "deg_overview",
+        "type": "table",
+        "title": "DEG Summary"
+      }
+    ]
+  },
+  "execution": {
+    "mode": "hpc_sbatch",
+    "remote_workdir_pattern": "~/bioflow/{project_id}/{job_id}",
+    "sbatch_template": "templates/rnaseq_star_deseq2.sbatch.j2",
+    "config_template": "templates/rnaseq_config.yaml.j2"
+  }
+}

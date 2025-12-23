@@ -1,0 +1,15 @@
+#!/bin/bash
+#SBATCH --job-name=rnaseq_star_deseq2
+#SBATCH --cpus-per-task={{ cpus }}
+#SBATCH --mem={{ memory }}G
+#SBATCH --partition={{ partition }}
+
+set -e
+
+WORKDIR={{ workdir }}
+mkdir -p "$WORKDIR"
+cd "$WORKDIR"
+
+rnaseq_config=config.yaml
+
+echo "Running RNA-seq pipeline in $WORKDIR"
