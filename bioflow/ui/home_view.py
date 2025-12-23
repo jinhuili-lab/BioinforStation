@@ -1,0 +1,87 @@
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QGroupBox
+from PySide6.QtCharts import QChart, QChartView, QLineSeries, QValueAxis
+from PySide6.QtCore import QTimer, QPointF, Qt
+import psutil
+
+class HomeView(QWidget):
+    def __init__(self):
+        super().__init__()
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(24, 24, 24, 24)
+        layout.setSpacing(16)
+        title = QLabel("BioFlow Desktop")
+        title.setStyleSheet("font-size: 22px; font-weight: 700;")
+        layout.addWidget(title)
+        buttons_row = QHBoxLayout()
+        new_project_btn = QPushButton("New Project")
+        add_server_btn = QPushButton("Add Server")
+        open_plugins_btn = QPushButton("Open Plugin Market")
+        buttons_row.addWidget(new_project_btn)
+        buttons_row.addWidget(add_server_btn)
+        buttons_row.addWidget(open_plugins_btn)
+        buttons_row.addStretch(1)
+        layout.addLayout(buttons_row)
+        recent_group = QGroupBox("Recent Projects")
+        recent_layout = QVBoxLayout(recent_group)
+        recent_layout.addWidget(QLabel("No recent projects"))
+        layout.addWidget(recent_group)
+        servers_group = QGroupBox("Recent Servers")
+        servers_layout = QVBoxLayout(servers_group)
+        servers_layout.addWidget(QLabel("No servers configured"))
+        layout.addWidget(servers_group)
+        charts_row = QHBoxLayout()
+        self.cpu_series = QLineSeries()
+        self.cpu_chart = QChart()
+        self.cpu_chart.addSeries(self.cpu_series)
+        self.cpu_chart.setTitle("CPU Usage (%)")
+        self.cpu_axis_x = QValueAxis()
+        self.cpu_axis_x.setRange(0, 60)
+        self.cpu_axis_x.setLabelFormat("%d")
+        self.cpu_axis_y = QValueAxis()
+        self.cpu_axis_y.setRange(0, 100)
+        self.cpu_axis_y.setLabelFormat("%d")
+        self.cpu_chart.addAxis(self.cpu_axis_x, Qt.AlignBottom)
+        self.cpu_chart.addAxis(self.cpu_axis_y, Qt.AlignLeft)
+        self.cpu_series.attachAxis(self.cpu_axis_x)
+        self.cpu_series.attachAxis(self.cpu_axis_y)
+        self.cpu_view = QChartView(self.cpu_chart)
+        self.cpu_view.setMinimumHeight(260)
+        self.mem_series = QLineSeries()
+        self.mem_chart = QChart()
+        self.mem_chart.addSeries(self.mem_series)
+        self.mem_chart.setTitle("Memory Usage (%)")
+        self.mem_axis_x = QValueAxis()
+        self.mem_axis_x.setRange(0, 60)
+        self.mem_axis_x.setLabelFormat("%d")
+        self.mem_axis_y = QValueAxis()
+        self.mem_axis_y.setRange(0, 100)
+        self.mem_axis_y.setLabelFormat("%d")
+        self.mem_chart.addAxis(self.mem_axis_x, Qt.AlignBottom)
+        self.mem_chart.addAxis(self.mem_axis_y, Qt.AlignLeft)
+        self.mem_series.attachAxis(self.mem_axis_x)
+        self.mem_series.attachAxis(self.mem_axis_y)
+        self.mem_view = QChartView(self.mem_chart)
+        self.mem_view.setMinimumHeight(260)
+        charts_row.addWidget(self.cpu_view)
+        charts_row.addWidget(self.mem_view)
+        layout.addLayout(charts_row)
+        layout.addStretch(1)
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_stats)
+        self.timer.start(1000)
+
+    def _append_point(self, series, value):
+        if series.count() >= 60:
+            points = [series.at(i) for i in range(series.count())][1:]
+            series.clear()
+            for idx, p in enumerate(points):
+                series.append(QPointF(idx, p.y()))
+            series.append(QPointF(59, value))
+        else:
+            series.append(QPointF(series.count(), value))
+
+    def update_stats(self):
+        cpu = psutil.cpu_percent(interval=None)
+        mem = psutil.virtual_memory().percent
+        self._append_point(self.cpu_series, cpu)
+        self._append_point(self.mem_series, mem)
