@@ -44,7 +44,7 @@ BioStudio 让流程变得简单：
 
 ## 📦 安装指南
 下载最新版本：  
-https://github.com/yourname/biostudio/releases
+https://github.com/jinhuili-lab/BioinforStation
 
 双击安装包即可使用。
 
